@@ -8,13 +8,16 @@
 import UIKit
 import MapKit
 
+
+
 class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
     let locationManager = CLLocationManager()
 //    var currentLocation: CLLocation!
     var microCenters: [MKMapItem] = []
+    var phoneNumber: [String] = []
     var currentLocation = CLLocation(latitude: 41.8781, longitude: -87.6298)
-    let placeName = ""
-    let placeInfo = ""
+    var placeName = ""
+    var placeInfo = ""
     
     @IBOutlet weak var mapView: MKMapView!
     override func viewDidLoad() {
@@ -35,9 +38,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     
     @IBAction func zoomIn(_ sender: UIBarButtonItem) {
-        let center = CLLocation(latitude: 41.8781, longitude: -87.6298)
-        let span = MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1)
-        let myRegion = MKCoordinateRegion(center: center.coordinate, span: span)
+        let center = currentLocation.coordinate
+        let span = MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 10)
+        let myRegion = MKCoordinateRegion(center: center, span: span)
         mapView.setRegion(myRegion, animated: true)
     }
     
@@ -56,15 +59,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             for currentMapItem in response.mapItems {
                 self.microCenters.append(currentMapItem)
                 //MARK: Stretch 2
-
+                self.phoneNumber.append(currentMapItem.phoneNumber ?? "Not Provided")
+                print(currentMapItem.phoneNumber)
+                print(phoneNumber)
                 let annotation = MKPointAnnotation()
                 annotation.title = currentMapItem.name
                 annotation.coordinate = currentMapItem.placemark.coordinate
-                if let city = currentMapItem.placemark.locality, let state = currentMapItem.placemark.administrativeArea {
-                           annotation.subtitle = "\(parseAddress(currentMapItem: currentMapItem.placemark))"
-                       }
-//                var placeInfo = parseAddress(currentMapItem: currentMapItem.placemark)
+                annotation.subtitle = "\(parseAddress(currentMapItem: currentMapItem.placemark))"
+                placeName = parseAddress(currentMapItem: currentMapItem.placemark)
                 self.mapView.addAnnotation(annotation)
+                
             }
         }
         
@@ -92,8 +96,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             currentMapItem.administrativeArea ?? ""
             
         )
-        print(addressLine)
-        var placeInfo = addressLine
+         placeName = addressLine
         return addressLine
     }
     
@@ -114,15 +117,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
            }
        }
     
-    
+//
     
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-//        let placename = placeName
-//        let placeinfo = "\(parseAddress(currentMapItem: currentMapItem.placemark))"
-
-        let ac = UIAlertController(title: placeName, message: placeInfo, preferredStyle: .alert)
+        let ac = UIAlertController(title: placeName, message: phoneNumber.joined(), preferredStyle: .alert)
         ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
     }
+    
 }
+
 
